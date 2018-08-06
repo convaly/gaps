@@ -4,9 +4,7 @@ from datetime import timedelta
 from gocal import GCalendar
 
 
-def get_events():
-    c = GCalendar()
-    c.start()
+def get_events(c):
     all_raw_events = c.get_raw_events()
     b, split, matrix = [], [], []
     date = datetime.date(datetime.today())
@@ -44,7 +42,9 @@ def to_just_names(full_table):
 
 
 # start
-t = get_events()
+c = GCalendar()
+c.start()
+t = get_events(c)
 print(to_just_names(t))
 
 
