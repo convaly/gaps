@@ -6,9 +6,10 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 import datetime
 
+
 class GCalendar:
     # Setup the Calendar API
-    def setup (self):
+    def start(self):
         SCOPES = 'https://www.googleapis.com/auth/calendar'
         store = file.Storage('credentials.json')
         creds = store.get()
@@ -17,13 +18,11 @@ class GCalendar:
             creds = tools.run_flow(flow, store)
         self.service = build('calendar', 'v3', http=creds.authorize(Http()))
 
-
     # Call the Calendar API
-    def callapi (self):
-        now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-        print('Getting the upcoming 10 events')
+    def get_raw_events(self):
+        now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
         events_result = self.service.events().list(calendarId='primary', timeMin=now,
-                                              maxResults=10, singleEvents=True,
+                                               singleEvents=True,
                                               orderBy='startTime').execute()
         events = events_result.get('items', [])
 
@@ -31,9 +30,10 @@ class GCalendar:
             print('No upcoming events found.')
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
-            print(start, event['summary'])
+            end = event['end'].get('dateTime', event['end'].get('date'))
+        return events
 
-    def addEvent(self, name, start, end):
+    def add_event(self, name, start, end):
         event = {
             'summary': name,
             #'location': '800 Howard St., San Francisco, CA 94103',
@@ -63,4 +63,4 @@ class GCalendar:
         }
 
         event = self.service.events().insert(calendarId='primary', body=event).execute()
-        print ('Event created: %s' % (event.get('htmlLink')))
+        print('Event created: %s' % (event.get('htmlLink')))
