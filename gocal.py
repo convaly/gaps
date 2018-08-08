@@ -9,7 +9,7 @@ import datetime
 
 class GCalendar:
     # Setup the Calendar API
-    def start(self):
+    def __init__(self):
         SCOPES = 'https://www.googleapis.com/auth/calendar'
         store = file.Storage('credentials.json')
         creds = store.get()
@@ -18,19 +18,16 @@ class GCalendar:
             creds = tools.run_flow(flow, store)
         self.service = build('calendar', 'v3', http=creds.authorize(Http()))
 
-    # Call the Calendar API
     def get_raw_events(self):
         now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
         events_result = self.service.events().list(calendarId='primary', timeMin=now,
-                                               singleEvents=True,
-                                              orderBy='startTime').execute()
+                                                   singleEvents=True,
+                                                   orderBy='startTime').execute()
         events = events_result.get('items', [])
 
         if not events:
             print('No upcoming events found.')
-        for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            end = event['end'].get('dateTime', event['end'].get('date'))
+
         return events
 
     def add_event(self, name, start, end):
